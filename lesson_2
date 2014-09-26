@@ -1,0 +1,115 @@
+RNI 420: Advanced Rini topics
+
+LESSON 2: WORKING WITH FILES
+
+Greetings. Welcome to your second day in rinina school. Today we will show you how to work with the files on your computer. Start by importing the following libraries:
+
+//
+	import pandas as pd
+	import numpy as np
+	import os
+//
+
+What? A new module? What is this 'os'? 'os' refers to the operating system. It allows you to work with your operating system from within python. You can list the content of directories, get properties of files (like size), change the working directory, and lots of other cool stuff.
+
+The primary 'os' method that we're going to use in this lesson is:
+
+//
+	os.listdir('.')
+
+//
+
+This method creates a list containing the names of every file in a directory. '.' means the current working directory. You can put any path you want into the parentheses. Here are some other useful 'os' functions:
+
+//
+	os.chdir(<PATH>) #changes the working directory to the given path
+
+	os.chdir('..') #goes up one directory
+
+	os.getcwd() #returns the current working directory as a string
+
+	os.mkdir(<NAME>) #makes a new directory (folder) in the current directory
+
+	os.mkdir(<PATH>/<NAME>) #you can specify the full path of the new directory, if you want to make it in a specific path
+
+	os.path.exists(<PATH>) #checks to see if a path exists, and returns True/False.
+
+	os.walk() #advanced function. Iterates through all subdirectories below the given directory. tbh I don't even know how to use this.
+//
+
+Ok, we'll come back to this later. First let's learn how to read files in pandas.
+
+The pandas library has many built-in methods for reading files. csv and txt files are generally the easiest to work with, although pandas also supports more advanced structures like excel files, and high-performance data structures like HDF5.
+
+To import plain csv and txt files as DataFrames, use the following method:
+
+//
+
+	df = pd.read_csv(<FILENAME>)
+
+	#Wow, that was easy!
+	#Read csv assumes that the file is comma-delimted. For tab delimited files, specify the 'sep' argument:
+
+	df = pd.read_csv(<FILENAME>, sep='\t') #Where '\t' represents tab. Similarly, for space-delimited files, you could do:
+
+	df = pd.read_csv(<FILENAME>, sep=' ')
+
+	#If the csv contains a header that takes up the first four rows, tell the csv reader method to skip the first four rows:
+
+	df = pd.read_csv(<FILENAME>, skiprows=4)
+
+	#You can check out more optional arguments by typing pd.read_csv? in the ipython shell, or by visiting the pandas API online.
+//
+
+
+To read excel files, you have to specify the sheet that you want to read. Call the read_excel method:
+
+//
+
+	df = pd.read_excel(<FILENAME>, <SHEETNAME>)
+
+	#Keep in mind that excel files are often not formatted exactly like rectangular tables. You may need to pass in a skiprows argument to skip extraneous headers, etc.
+
+	#Often you may end up with a bunch of columns filled with nulls. You can drop null rows/columns using the dropna() method
+
+	df.dropna()
+
+	#More often than not, you will want to drop rows that contain nulls only in a particular column or list of columns. You can do so like this:
+
+	df.dropna(subset=[<COLUMN NAME>])
+
+	#You can also 'fill' nulls with a value of your choice (usually 0)
+
+	df.fillna(value=0)
+
+	df.fillna(value='rini')
+//
+
+
+
+Okays. Now before we move on, let's start with a refresher on dictionaries. Why, you ask? Because when you start importing files into your python session, you're going to need a systematic way of keeping track of all your files, and their names. For instance, say you want to (1) loop through a directory and import a bunch of csv files as DataFrames, and (2) you want the variable name of each DataFrame to correspond to the filename. This can't be done! There's no way to create new variable names on-the-fly in a for loop.
+
+Instead, we use dictionaries. Here is how you would loop through a directory, and import all the tables to a dictionary (d):
+
+//
+
+	d = {}
+
+	for filename in os.listdir('.'):
+		df = pd.read_csv(filename)
+		d.update( { filename : df } )
+	
+	#The .update() method inserts a key:value pair into a dictionary. In this case, the key is the filename, and the value is the corresponding dataframe.
+
+	#We can now access any imported table by typing d[<FILENAME>]
+
+
+	#The following three methods are really important for dealing with dictionaries, esp. in for loops:
+
+	d.keys() #Should give you a list of all the filenames of the imported tables
+	d.values() #Will return all the tables you imported in a list.
+	d.items() #Will enumerate the key:value pairs. This is useful in for loops.
+
+//
+
+That's it for today's rinina school. Next time we'll talk about merging, concatenating, and other SQL-like operations.
