@@ -1,0 +1,203 @@
+RNI 420: Advanced Rini topics
+
+LESSON 1: INTRODUCTION TO PANDAS
+
+Greetings. Welcome to rinina school. Today we will be introducing you to data analysis in python using the pandas library. Start by importing the following libraries:
+
+//
+	import pandas as pd
+	import numpy as np
+//
+
+First, let's go over the two basic data structures in pandas: Series and DataFrames.
+
+
+- A Series is a one-dimensional array. You can think of it as being like a python 'list'.
+
+- A DataFrame is a two-dimensional array. You can think of it as being like an excel table.
+
+
+Let's make a Series! You can convert a list into a Series very easily:
+
+//
+	#Let's start with a list of integers from 20 to 39:
+	
+	li = range(20,39)
+
+	#Now we can convert this list to a Series like so:
+
+	pd.Series(li)
+
+	#Let's save the series to a variable (s):
+
+	s = pd.Series(li)
+//
+
+A series is like a list, except it has extended functionality. The 'index' is a very important concept in pandas. Think of it as the 'primary key' of an access database. It allows you to uniquely identify each entry in a Series or DataFrame. Type the name of the series (s) in your shell, and hit ENTER. Notice that there are two columns of numbers: on the right you will see the entries (numbers 20 to 38) and on the left you will have the index (0 to 19). For Series or DataFrames, the index defaults to a list of integers (starting with 0 and ending with len(Series)-1. However, you can make the index anything you want (for example, if you are working with the assessor database, you may want the index to be the the AIN code of the parcel). As with a list, you can select values using their corresponding indices:
+
+//
+	s[0] #will select the entry with the index of 0
+
+	s.loc[0] #will also select the entry with the index of 0
+
+	#You can pass a list into the indexer to select an arbitrary subset of the Series:
+
+	s[[0,1,2,3,5,6,7,8,9]] #will select entries with these indexes
+
+	s.loc[[0,1,2,3,5,6,7,8,9]] #will also select entries with these indexes
+
+	#The difference between these two syntaxes will make more sense when we start working with DataFrames.
+
+	#You can get the index of the Series by calling the Series' .index attribute:
+
+	s.index
+
+	#Right now, the Series is indexed by integer values. Let's say we want to convert the index values to strings:
+
+	s.index = [str(i) for i in s.index]
+
+	#Now call s.index again
+
+	s.index
+
+	#You will see that the index is now an array of strings. To select entries now, we must input a string to the indexer rather than an integer:
+
+	s['0']
+
+	s.loc['0']
+
+	s.loc[['0','1','2','3','5','6','7','8','9']]
+
+	#You can still select entries by their integer index. Simply call .iloc instead of .loc
+
+	s.iloc[0] #Will always return the first entry in the Series, regardless of what the index labels are.
+
+	s.iloc[len(s)-1] #Will always return the last entry in the Series, regardless of what the index labels are.
+
+//
+
+Here are some basic methods you can apply to our sample Series:
+
+//
+
+	s.max()
+	s.min()
+	s.mean()
+	s.mode()
+	s.quantile(0.95) #gives you the 95th percentile of values
+	s.std() #gives you an std
+
+	#For a full list of methods that you can apply to the Series (s), type "s.<TAB>" into the ipython shell. This is called "tab completion".
+	#You can get information about any of these methods by typing s.<name_of_method>? into ipython. Or you can just google the name of the method.
+
+//
+
+Okays! Enough about Series. Let's get started on some DataFrames. We can create a DataFrame like so:
+
+//
+	#First, let's make an empty DataFrame and set it to the variable 'df'
+
+	df = pd.DataFrame()
+
+	#Now, let's add some columns:
+
+	df['col_1'] = range(20)
+
+	df['col_2'] = [i**2 for i in df['col_1']]
+
+	#As with Series, we can select specific rows or columns:
+
+	df['col_1'] #will return the column with the label 'col_1'
+
+	#Now let's try using .loc to select data:
+
+	df.loc[10] #will return the row with the index label 10
+
+	df.loc[10, 'col_1'] #will return a single entry, corresponding to row 10 and column 'col_1'. Remember, row comes first, then column.
+
+	#You can also use list-slicing techniques:
+
+	df.loc[10:, 'col_1']
+
+	df.loc[5:10, ['col_1', 'col_2']]
+
+	#Boolean indexing is the easiest way to filter data in a pandas DataFrame or Series:
+
+	df.loc[df['col_2'] > 30] #Returns all entries where 'col_2' is greater than 30.
+
+	df.loc[df['col_1']%2 == 0] #Returns all entries where 'col_1' is even.
+
+	df.loc[(df['col_1'] > 5) & (df['col_2'] < 100)] #Example of an AND statement.
+
+	df.loc[(df['col_1'] < 5) | (df['col_2'] > 100)] #Example of an OR statement.
+
+	df.loc[df['col_1'].isin([2,3,5,7,11,13,17,19])] #Returns entries where 'col_1' is prime
+
+	#Notice the output when you type the following:
+
+	df['col_1']%2 == 0
+
+	#It will return a DataFrame of True/False values. This is how boolean indexing works under the hood: it basically indexes the DataFrame by the 'True' entries.
+
+	#You can set values using .loc:
+
+	df.loc[10, 'col_2'] = 69 #Sets the value of row 10 on 'col_2' to 69.
+
+	#Let's set all of the even numbers in 'col_1' to be 69:
+
+	df['col_1'].loc[df['col_1']%2 == 0] = 69
+
+	#Oh no! Now we have too many 69's. We can call the drop_duplicates method to get rid of the extra 69's:
+
+	df.drop_duplicates(subset=['col_1']) #Drops rows containing values that appear more than once in 'col_1'. This can be very useful for columns containing id codes.
+
+	#Let's say we really like the number 69. We can instead choose to drop every row that doesn't contain a 69 in 'col_1'. To do this, we pass the index labels we want to drop into the .drop() method.
+
+	#First, let's select all the entries that aren't 69.
+
+	bad_numbers = df.loc[df['col_1'] != 69]
+
+	index_labels_we_want_to_drop = bad_numbers.index
+
+	df.drop(index_labels_we_want_to_drop)
+
+	#If you want to make the change permanent, use df = df.drop(index_labels_we_want_to_drop)
+
+//
+
+
+Okays! Now that we've got a handle on indexing data, let's try doing some basic operations on a DataFrame:
+
+//
+
+	#First, let's make an empty DataFrame and set it to the variable 'df'
+
+	df = pd.DataFrame()
+
+	#Now, let's add some columns:
+
+	df['col_1'] = range(20)
+
+	df['col_2'] = [i**2 for i in df['col_1']]
+
+	#Let's make some calculated columns as well:
+
+	df['col_3'] = df['col_2'] - df['col_1']**1.5
+
+	df['col_4'] = df['col_3'] + 69
+
+	df['col_5'] = df['col_1'].cumsum() #Gives you a column representing the cumsum of 'col_1'
+
+	#Let's try getting the sum of the columns/rows, just like in excel:
+
+	df.sum(axis=0) #Will give you the sum of each column (i.e. from top to bottom)
+
+	df.sum(axis=1) #Will give you the sum of each row (i.e. from left to right)
+
+	df.sum() #defaults to axis=0
+
+	#Try playing around with df.mean(), df.median(), df.mode(), df.max(), df.min(), df.quantile(), etc.
+
+//
+	
+That's all for this lesson! Next time we'll learn how to read data from files, and we'll also learn how to do some basic database operations.
