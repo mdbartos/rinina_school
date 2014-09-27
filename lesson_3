@@ -75,7 +75,7 @@ When using pd.concat, you need to specify the axis you want to concatenate along
 	
 	#Now let's add these new rows by using pd.concat to concatenate based on the column labels.
 	
-	newdf_2 = pd.concat([newdf, df_3], axis=0) #Note that if the axis isn't specified, it defaults to axis=0
+	newdf_2 = pd.concat([newdf, df_3], axis=0) #Side note: if the axis isn't specified, it defaults to axis=0
 	
 	#All right! But wait, what are these NaNs? These are nulls (np.nan), created because we were missing the 'ATTACK 2' column in df_3. Uh oh!
 	#We can ignore these NaNs because, unlike 0's, they will not be included in any aggregation operations (like count, mean, median, or std).
