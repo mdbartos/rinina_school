@@ -1,0 +1,121 @@
+RNI 420: Advanced Rini topics
+LESSON 3: BASIC DATABASE FUNCTIONS
+
+Greetings. Welcome to your third day in rinina school. Today we will show you how to perform some very basic database operations, like joining tables and performing group by's:
+
+First, a note on nulls:
+--------------
+
+In regular python, nulls are usually represented by the <None> object. Try typing <None> into the shell (without the carrots) and hitting ENTER. Instead of throwing an undefined variable error, the interpreter should return <None>.
+
+For numeric values, pandas generally represents nulls as <np.nan>. From the name, you can see that this object is taken from the numpy library (remember, we imported numpy as np). The <nan> in <np.nan> means "not a number". It is similar to the native python <None> object, except that it is typed as a 64-bit float. This seems kind of weird, but it confers a few advantages: (1) you can use it with other numbers [i.e. 3*np.nan is a valid expression, and will return np.nan], and (2) it allows your Series to be singly-typed [i.e. everything in a Series has the same type, like float, int, string, etc.]. Having a singly-typed array speeds up calculations by several orders of magnitude. It's one of the reasons we use pandas and numpy in the first place.
+
+(btw, I don't think I mentioned it before, but every column in a DataFrame is a pandas Series. This is an important fact to remember when performing join operations).
+
+For strings, null values can be represented as an empty string: "" or ''.
+
+Concatenating Data:
+------------------------
+
+Concatenation allows you to join Series or DataFrames togther based on a shared index. Let's start by creating two dataframes. We can use the from_dict method to create DataFrames from a dictionary:
+
+//
+
+	d1 = {
+			'NAME' : ['rini', 'matt', 'doge', 'cat'],
+			'CLASS' : ['goth girl', 'treasure hunter', 'mammal', 'mammal']
+			}
+			
+	d2 = {
+			'NAME' : ['doge', 'cat', 'rini', 'matt'],
+			'HP' : [30, 20, 69, 420],
+			'ATTACK 1' : ['growl', 'scratch', 'scratch', 'growl'],
+			'ATTACK 2' : ['bite', 'bite', 'avada kedavara', 'dragon breath']		
+			}
+			
+	df_1 = pd.DataFrame.from_dict(d1)
+	
+	df_2 = pd.DataFrame.from_dict(d2)
+	
+	#We want to identify each row by the 'name', so let's set the index to be the 'NAME' column. 
+
+	df_1 = df_1.set_index('NAME')
+	df_2 = df_2.set_index('NAME')
+	
+	#If you want to reset the index to an integer index, call the reset_index method:
+	
+	df_1.reset_index()
+	
+	#Note that in this case, it didn't save the change because I didn't reassign the variable df_1.
+
+//
+
+Okays, now we have two dataframes, df_1 and df_2. But wait a second, the rows are in a different order! No problem. The concatenate function will match the rows based on a shared index:
+
+//
+
+	newdf = pd.concat([df_1, df_2], axis=1)
+	#                      ^ The first argument is a list of DataFrames or Series to concatenate.
+	#                                 ^ The second argument tells the function to concatenate using the row labels. More on this in a second.
+	
+//
+
+When using pd.concat, you need to specify the axis you want to concatenate along. axis=0 will concatenate based on the column labels--i.e. it will add new rows based on shared column labels. axis=1 will concatenate based on row labels--i.e. it will add new columns based on shared row labels. WHEN YOU WANT TO ADD NEW COLUMNS, USE axis=1; WHEN YOU WANT TO ADD ROWS, USE axis=0. In the previous case, the DataFrames share a set of row labels, but have different column labels. We wanted to add the extra columns and match up the row labels. Thus, we used axis=1. Let's create a new dataframe and try out axis=0:
+
+//
+
+	d3 = {
+			'NAME' : ['cockatiel', 'turtle', 'eagle'],
+			'CLASS' : ['aves', 'reptile', 'aves'],
+			'ATTACK 1' : ['scratch', 'bite', 'scratch'],
+			'HP' : [10, 800, 200]
+			}
+
+	df_3 = pd.DataFrame.from_dict(d3).set_index('NAME') #Creates a dataframe from dict and sets the index to 'NAME'
+	
+	#Now let's add these new rows by using pd.concat to concatenate based on the column labels.
+	
+	newdf_2 = pd.concat([newdf, df_3], axis=0) #Note that if the axis isn't specified, it defaults to axis=0
+	
+	#All right! But wait, what are these NaNs? These are nulls (np.nan), created because we were missing the 'ATTACK 2' column in df_3. Uh oh!
+	#We can ignore these NaNs because, unlike 0's, they will not be included in any aggregation operations (like count, mean, median, or std).
+	#However, if you really want to get rid of them, you can use dropna() or fillna()
+	
+	newdf_2.dropna() #drops any row containing a NaN
+	newdf_2.dropna(subset=['ATTACK 2']) #drop rows with NaNs occurring in column 'ATTACK 2'
+	
+	#You can also use fillna to replace missing data
+	
+	newdf_2.fillna('tackle') #replaces NaNs with another value, in this case 'tackle'. You can enter additional arguments for more complex criteria.
+	
+	#Let's use fillna in this case
+	
+	newdf_2 = newdf_2.fillna('tackle')
+	
+//
+
+Ok, now let's try some aggregation operations. These are just like the GROUP BY operations in MS ACCESS (tm).
+
+//
+
+	#Let's GROUP BY the 'CLASS' column.
+	
+	newdf_2.groupby('CLASS')
+	
+	#Note that it just returns a memory object. To create meaningful output, we have to call an aggregator function (like sum, count, mean, etc.), just like in MS ACCESS (tm).
+	
+	newdf_2.groupby('CLASS').count() #Shows that there are two mammals, two aves, 1 reptile, 1 goth girl, and 1 treasure hunter.
+	
+	newdf_2.groupby('CLASS').mean() #Shows that reptiles have the most HP on average, followed by treasure hunters
+	
+	#Let's group by the 'ATTACK 1' field:
+	
+	newdf_2.groupby('ATTACK 1').mean() #shows that bite and growl are most strongly correlated with high HP
+	
+	#We can also call groupby on a list of fields to get a hierarchical index:
+	
+	newdf_2.groupby(['CLASS', 'ATTACK 1']).count() #Groups by 'class' first, then 'attack 1'.
+	
+//
+
+That's it for today's rinina school. Next time, we'll start with our first assignment!
