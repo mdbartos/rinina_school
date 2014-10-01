@@ -1,0 +1,204 @@
+RNI 420: Advanced Rini topics
+LESSON 3: WORKING WITH DATES AND TIMES
+
+Dealing with time can be tricky (See Tom Scott's rant on timezones here: https://www.youtube.com/watch?v=-5wpm-gesOY).
+
+Fortunately, python has built-in libraries that can save you a lot of trouble.
+
+The central library for dealing with dates and times is called "datetime". Other important libraries include "time", "dateutils" and "pytz" (python time zones). Right now, let's concentrate on datetime.
+
+//
+
+	import datetime
+	
+//
+
+We will be dealing with four submodules of the datetime package. If you get tired of typing datetime.date or datetime.timedelta all the time, you can just import the specific packages you need:
+
+//
+
+	from datetime import date
+	from datetime import time
+	from datetime import datetime
+	from datetime import timedelta
+	
+//
+
+Thus, datetime.date() can now simply be called as date() and datetime.time() can simply be called as time(), etc.
+
+For this lesson, I'm going to assume that you just used <import datetime>. Thus, all references to datetime methods will take the form of datetime.<method>() instead of just <method>().
+
+//
+
+	#Let's start with dates.
+	#Dates have both a linear and a periodic dimension. The year increases as time moves forward. However, months and days repeat in cycles.
+	#Date objects are specified using the datetime.date() method in (year, month, day) format.
+	#Let's make rini's birthday!
+	
+	rini_birthday = datetime.date(1990, 7, 27)
+	
+	#A date object has attributes like year, month, and day. We can access these attributes directly by calling them:
+	
+	rini_birthday.year
+	rini_birthday.month
+	rini_birthday.day
+	rini_birthday.weekday() 	#Note that this one is a method, not an attribute (no idea why)
+	
+	#You can use the strftime() (string format time) method to return information about a datetime object as a string. This is useful if you need the day of the week or the name of the month:
+	
+	rini_birthday.strftime('%A')					#Will return the day of the week that rini was born (Friday!)
+	datetime.date.strftime(rini_birthday, '%A') 	#Is a more verbose way of doing the same thing.
+	
+	rini_birthday.strftime('%A %B %d %Y')			#The time of the rini
+		
+	#For all the strftime() formatting choices, see: https://docs.python.org/2/library/datetime.html#strftime-and-strptime-behavior
+
+	#strptime() is the inverse of strftime. It allows you to parse strings into datetime objects
+	
+	ex_string = '02/08/02'
+	datetime.datetime.strptime(ex_string, "%m/%d/%y")
+	
+	ex_string2 = '2 October 2005'
+	datetime.datetime.strptime(ex_string2, "%d %B %Y")
+	
+	#See the above link for strptime formatting guidelines
+	
+	#The strptime method can be really useful for dealing with raw excel output.
+	
+	#The datetime.time method allows you to specify information about time (sub-daily) without specifying any information about the date
+	#This may be useful for capturing a recurring event
+	#The format for specifying a datetime.time object is as follows:
+	#datetime.time(hour, minute, second, microsecond, timezone info)
+	#All arguments are optional, meaning that entering datetime.time() will create an object corresponding to (0, 0, 0, 0) hours, minutes, seconds, microseconds.
+	
+	happy_hour = datetime.time(16, 30)					#Note that I didn't enter a value for second or microsecond--these values will default to zero.
+	
+	#Date and time information can be combined together using datetime.datetime()
+	#The format for specifying a datetime.datetime object is as follows:
+	#datetime.datetime(year, month, day, hour, minute, second, microsecond, [timezone info])
+	#For a datetime.datetime object, the year, month and day are required, but the rest of the arguments are optional and will default to zero.
+	
+	ball_drop = datetime.datetime(2014, 12, 31, 12, 59, 59, 59)
+	
+//
+
+Differences between dates can be captured using a timedelta object. You cannot add or subtract raw integers from dates as this causes a TypeError. The computer doesn't know whether you're trying to add days, months, years, etc.. Instead, to increment a date you must add and subtract timedelta objects.
+
+//
+
+	#First, let's make rini's birthday.
+	
+	rini_birthday = datetime.date(1990, 7, 27)
+		
+	#You can get the date 69 days from rini's birthday using the timedelta method
+		
+	rini_birthday + datetime.timedelta(69)
+		
+	#Dates can also be subtracted from each other to create timedelta objects
+		
+	matt_birthday = datetime.date(1989, 9, 15)
+	
+	rini_birthday - matt_birthday 		#Should show that matt is about 315 days older than rini.
+	
+	#Timedelta defaults to days, but you can also enter keyword arguments to add different time values:
+	
+	rini_birthday + datetime.timedelta(weeks=7, days=69, hours=420, minutes=12, seconds=9)
+		
+	#Timedelta can only go up to weeks. If you want to add months or years, you must use the relativedelta module.
+	#This is because the number of months from a particular day changes depending on the day of year.
+	#Let's import the relativedelta module:
+	
+	from dateutil.relativedelta import relativedelta
+		
+	relativedelta(rini_birthday, matt_birthday)				#Returns the number of months and days as a relativetime object
+		
+	relativedelta(rini_birthday, matt_birthday).months		#Gives you the number of months as an integer
+		
+	#You can also specify the years/months/days that you want to jump:
+	
+	relativedelta(months=10, days=2)	#Should return the same result as before
+		
+	#You can add relativedelta to a datetime object, just like a timedelta
+		
+	matt_birthday + relativedelta(rini_birthday, matt_birthday)
+	matt_birthday + relativedelta(months=10, days=12)
+		
+
+		
+	#Timedelta and relativedelta can also be used to create ranges of dates.
+	
+	#Let's get a list of all of the days between matt_birthday and rini_birthday
+	#You can do this in native python using a list comprehension:
+	
+	matt_range = [(matt_birthday + datetime.timedelta(i)) for i in range(1+(rini_birthday - matt_birthday).days)]
+	#					^The output											^The list to generate from; equivalent to range(316)
+		
+	#This is a little bit much
+	#Fortunately, pandas has a built-in functionality that makes this a lot easier:
+	#The function is called pd.date_range() and takes the following form:
+	
+	#pd.date_range(start, end, periods, freq, tz, ... (more optional arguments follow))
+	
+	#freq specifies the time step (days, months, years, etc.)
+	#To get the date range from matt's birthday to rini's birthday, you can do this:
+		
+	matt_range = pd.date_range(start=matt_birthday, end=rini_birthday)
+	
+	#or
+	
+	matt_range = pd.date_range(matt_birthday, rini_birthday)
+		
+	#You can also use periods if you don't know the end date:
+		
+	matt_range = pd.date_range(start=matt_birthday, periods=316, freq='D') #Where freq='D' means that the frequency of the period is in days.
+		
+	#By default, pd.date_range creates an index object. However, you can convert it to a Series fairly easily:
+		
+	matt_range = pd.Series(matt_range)
+		
+	#Let's put this date range into a pandas dataframe.
+		
+	df = pd.DataFrame()
+		
+	df['date'] = matt_range
+		
+	#Now let's make columns corresponding to year, month and day
+		
+	df['year'] = [i.year for i in df['date']]
+	df['month'] = [i.month for i in df['date']]
+	df['day'] = [i.day for i in df['date']]
+		
+	#We can even make a weekday column
+		
+	df['weekday'] = [i.strftime('%A') for i in df['date']]
+	
+	#Now let's do some fun stuff.
+	#We can select only the summer months like so:
+	
+	summer_months = df.loc[df['month'].isin([6,7,8])]
+	
+	#Or only the weekends like so:
+	
+	weekends = df.loc[df['weekday'].isin(['Saturday', 'Sunday'])]
+	
+	#We can also use our groupby skills to group by month--this is really useful if you need monthly averages of something:
+	
+	df.groupby('month').count()
+	df.groupby('month').mean()
+
+//
+
+Ok, one more random note. Sometimes when you read a raw csv (using read_csv), pandas will import datetime columns in string format. You can automatically convert the column to datetime using the to_datetime method:
+
+//
+
+	df = read_csv(<filepath>)
+	
+	#Let's assume there is a date column called 'date' that was parsed as a string
+	#We can convert it automatically like this:
+	
+	df['date'] = pd.to_datetime(df['date'])
+	
+//
+
+That's it for today's rinina. Next time we'll have your first assignment. For reals!
