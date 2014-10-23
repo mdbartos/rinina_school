@@ -7,13 +7,10 @@ import datetime
 
 d = {}
 
-readpath = '/home/tabris/Dropbox/Southwest Heat Vulnerability Team Share/validation_data'
-
-for filename in os.listdir(readpath):
-	if filename.endswith('csv'):
-		print filename
-		df = pd.read_csv(readpath + '/' + filename, sep='\t', header=None)
-		d.update({filename: df})
+for filename in os.listdir('/home/tabris/Desktop'):
+	if filename.endswith('txt'):
+		df = pd.read_csv(filename)
+		d.update({filename.split('.')[0].split('_')[-1]: df})
 
 cat = pd.concat([i for i in d.values()])
 
