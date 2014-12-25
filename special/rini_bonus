@@ -1,0 +1,26 @@
+#ipython --pylab
+
+import os
+import numpy as np
+import pandas as pd
+import datetime
+
+d = {}
+
+readpath = '/home/tabris/Dropbox/Southwest Heat Vulnerability Team Share/validation_data'
+
+for filename in os.listdir(readpath):
+	if filename.endswith('csv'):
+		print filename
+		df = pd.read_csv(readpath + '/' + filename, sep='\t', header=None)
+		d.update({filename: df})
+
+cat = pd.concat([i for i in d.values()])
+
+cat['Year'].replace(99,1999, inplace=True)
+
+g = cat.groupby('Year').mean()
+
+gp = cat.groupby('Year').quantile(0.5)
+
+plot(g.index, g['AirT'])

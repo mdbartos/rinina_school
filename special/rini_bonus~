@@ -1,0 +1,23 @@
+#ipython --pylab
+
+import os
+import numpy as np
+import pandas as pd
+import datetime
+
+d = {}
+
+for filename in os.listdir('/home/tabris/Desktop'):
+	if filename.endswith('txt'):
+		df = pd.read_csv(filename)
+		d.update({filename.split('.')[0].split('_')[-1]: df})
+
+cat = pd.concat([i for i in d.values()])
+
+cat['Year'].replace(99,1999, inplace=True)
+
+g = cat.groupby('Year').mean()
+
+gp = cat.groupby('Year').quantile(0.5)
+
+plot(g.index, g['AirT'])
