@@ -1,0 +1,70 @@
+Advanced file I/O
+
+	from_string
+	HDF5
+	netCDF
+	JSON
+
+More database operations
+	
+	query
+	merge
+	join
+	lookup
+	filter
+
+String methods
+
+	replace
+	cat
+	join
+	contains
+	match
+	extract
+
+Intermediate indexing
+
+	select
+	where
+	mask
+	at
+	iat
+
+Advanced indexing
+
+	multilevel
+	slice
+	xs
+	reindex
+	align
+	swaplevel
+	reorder levels
+
+Computational tools
+
+	percent change
+	corr
+	cov
+	rank
+	moving avg
+	cumsum
+
+Basic statistics
+
+	parametric tests
+	non-parametric tests
+
+Regression
+
+	polynomial regression
+	advanced regression
+
+Plotting
+
+	line
+	scatter
+	hist
+	bar
+	2dhist
+	density
+	formatting plot area
